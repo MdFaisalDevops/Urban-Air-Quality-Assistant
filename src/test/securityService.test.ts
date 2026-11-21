@@ -50,3 +50,4 @@ describe('SecurityService (Safe and Responsible Implementation)', () => {
     expect(typeof res.allowed).toBe('boolean');
   });
 });
+

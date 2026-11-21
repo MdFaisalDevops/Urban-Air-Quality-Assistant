@@ -122,3 +122,4 @@ export const SmogHourlyForecast: React.FC<SmogHourlyForecastProps> = ({ forecast
     </section>
   );
 };
+

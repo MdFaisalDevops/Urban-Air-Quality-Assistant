@@ -56,3 +56,4 @@ export const PROMPT_SHORTCUTS: PromptTemplate[] = [
     category: 'community',
   },
 ];
+

@@ -114,3 +114,4 @@ export class ImpactCalculator {
     return `By adopting these daily routines and indoor hacks in ${cityName}, your household prevents the inhalation of ${metrics.dailyPm25InhalationAvoidedMicrograms.toLocaleString()} µg of toxic PM2.5 daily (equivalent to avoiding smoking ${metrics.equivalentCigarettesAvoided} cigarettes per family member each day!). Furthermore, your commute and cooking choices reduce ${metrics.dailyCo2AvoidedKg} kg of CO2 and save approximately ₹${metrics.monthlyMedicalCostSavedInr.toLocaleString()} monthly in fuel and medical costs.`;
   }
 }
+

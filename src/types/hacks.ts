@@ -36,3 +36,4 @@ export interface PlantRecommendation {
   childPetSafe: boolean;
   notes: string;
 }
+

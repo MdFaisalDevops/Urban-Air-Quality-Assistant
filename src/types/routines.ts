@@ -38,3 +38,4 @@ export interface ImpactMetrics {
     hundredHouseholdsCo2Kg: number;
   };
 }
+

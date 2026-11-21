@@ -116,3 +116,4 @@ export const HelpInfoModal: React.FC<HelpInfoModalProps> = ({ isOpen, onClose })
     </div>
   );
 };
+

@@ -17,3 +17,4 @@ export interface PromptTemplate {
   prompt: string;
   category: 'routine' | 'diy_purifier' | 'children_seniors' | 'sustainable_cooking' | 'community';
 }
+

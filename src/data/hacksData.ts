@@ -178,3 +178,4 @@ export const NASA_PLANTS_DATABASE: PlantRecommendation[] = [
     notes: '100% safe for cats, dogs, and curious toddlers. Excellent bio-indicator of indoor air quality.',
   },
 ];
+

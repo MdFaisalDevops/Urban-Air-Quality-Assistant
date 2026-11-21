@@ -242,3 +242,4 @@ export const AqiOverviewCard: React.FC<AqiOverviewCardProps> = ({ city, highCont
     </section>
   );
 };
+

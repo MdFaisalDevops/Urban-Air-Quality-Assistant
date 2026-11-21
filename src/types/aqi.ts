@@ -65,3 +65,4 @@ export interface AqiScaleDefinition {
     general: string;
   };
 }
+

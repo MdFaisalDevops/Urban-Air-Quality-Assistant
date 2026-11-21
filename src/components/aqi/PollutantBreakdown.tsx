@@ -168,3 +168,4 @@ export const PollutantBreakdown: React.FC<PollutantBreakdownProps> = ({ pollutan
     </section>
   );
 };
+

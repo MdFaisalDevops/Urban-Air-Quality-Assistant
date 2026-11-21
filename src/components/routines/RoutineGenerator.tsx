@@ -172,3 +172,4 @@ export const RoutineGenerator: React.FC<RoutineGeneratorProps> = ({ profile, cit
     </section>
   );
 };
+

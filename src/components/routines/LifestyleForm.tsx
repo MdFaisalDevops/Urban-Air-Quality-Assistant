@@ -212,3 +212,4 @@ export const LifestyleForm: React.FC<LifestyleFormProps> = ({ profile, onChangeP
     </div>
   );
 };
+

@@ -53,3 +53,4 @@ describe('AqiService & CPCB Scale Definitions', () => {
     expect(info.familyAdvice.seniors).toBeDefined();
   });
 });
+

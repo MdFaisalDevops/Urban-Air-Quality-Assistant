@@ -173,3 +173,4 @@ export class AqiService {
     return Math.min(650, Math.round(highest.iH + (conc - highest.bpH) * 0.4));
   }
 }
+

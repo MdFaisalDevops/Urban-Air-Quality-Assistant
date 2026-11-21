@@ -55,3 +55,4 @@ describe('UI Components & Accessibility', () => {
     expect(screen.getByText(/Kolkata - Victoria Memorial/i)).toBeInTheDocument();
   });
 });
+

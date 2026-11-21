@@ -65,3 +65,4 @@ describe('ImpactCalculator (Direct Impact Quantification)', () => {
     expect(summary).toContain('CO2');
   });
 });
+

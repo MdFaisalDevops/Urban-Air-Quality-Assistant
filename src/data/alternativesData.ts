@@ -57,3 +57,4 @@ export const SUSTAINABLE_ALTERNATIVES_LIST: SustainableAlternative[] = [
     badge: 'Indoor Health Guardian',
   },
 ];
+
