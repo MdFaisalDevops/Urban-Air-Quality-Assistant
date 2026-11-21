@@ -2,6 +2,8 @@
 ### GenAI-Powered Urban Winter Smog Navigator & Community Air Defense Platform
 **Official Submission for PromptWars Virtual Challenge 6**
 
+[![Live Demo](https://img.shields.io/badge/Live_App-urban--air--quality--assistant--two.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://urban-air-quality-assistant-two.vercel.app/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MdFaisalDevops/Urban-Air-Quality-Assistant)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -9,6 +11,9 @@
 [![Vitest](https://img.shields.io/badge/Tests-17%20Passed-10B981?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Accessibility](https://img.shields.io/badge/WCAG-2.1%20AA%2FAAA-F59E0B?style=for-the-badge&logo=w3c&logoColor=white)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![GenAI](https://img.shields.io/badge/Google_Gemini-1.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+
+> 🚀 **Live Production Deployment**: **[https://urban-air-quality-assistant-two.vercel.app/](https://urban-air-quality-assistant-two.vercel.app/)**  
+> 📦 **GitHub Repository**: **[https://github.com/MdFaisalDevops/Urban-Air-Quality-Assistant](https://github.com/MdFaisalDevops/Urban-Air-Quality-Assistant)**
 
 ---
 
