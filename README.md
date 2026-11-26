@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)](https://eslint.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vitest](https://img.shields.io/badge/Tests-23%20Passed-10B981?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Tests-38%20Passed-10B981?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Accessibility](https://img.shields.io/badge/WCAG-2.1%20AA%2FAAA-F59E0B?style=for-the-badge&logo=w3c&logoColor=white)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![GenAI](https://img.shields.io/badge/Google_Gemini-1.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 
@@ -58,6 +58,10 @@ Indoor air quality frequently spikes to hazardous levels due to trapped cooking 
 ### 1. Code Quality – Structure, Readability, Maintainability
 - **Type Safety**: 100% strict TypeScript (`strict: true`, `noUnusedLocals: true`, `noUnusedParameters: true`) with zero `any` types across the entire codebase and custom `vite-env.d.ts` typing.
 - **Enterprise Error Boundary**: React `ErrorBoundary` wraps the UI to intercept runtime exceptions, safely log errors, and provide accessible recovery.
+- **Pure React Markdown AST**: Zero `dangerouslySetInnerHTML` usage. Implements `SafeMarkdownRenderer` for type-safe rendering with zero raw HTML execution vectors.
+- **Decoupled Domain Architecture**: Business algorithms are isolated in pure domain services (`RoutineService`, `ExpertEngineService`, `AqiService`, `ImpactCalculator`) with zero UI side-effects.
+- **Strict ESLint Governance**: Enforces `'no-alert': 'error'`, `'no-eval': 'error'`, `'no-debugger': 'error'`, and `'@typescript-eslint/no-explicit-any': 'error'`. Zero lint errors, zero warnings.
+- **Stable React Key Architecture**: 100% stable, unique domain keys across all collections—eliminating anti-pattern array index keys.
 - **Unified Constants & Config**: Eliminates magic values via centralized `STORAGE_KEYS`, `APP_CONFIG`, `SECURITY_CONFIG`, and `SCIENTIFIC_BENCHMARKS` (`src/constants/appConstants.ts`).
 - **Production Structured Logging**: `logger` utility masks sensitive credentials (API keys) and formats log levels across environments.
 - **ESLint & Prettier Tooling**: Modern ESLint flat configuration (`eslint.config.js`) coupled with `@typescript-eslint` and Prettier formatting (`npm run lint`).
@@ -79,13 +83,15 @@ Indoor air quality frequently spikes to hazardous levels due to trapped cooking 
 - **Instant Zero-Setup Mode**: Features a Built-in Deterministic AI Expert Engine that answers queries in under 50ms without consuming Google Gemini quota or requiring internet access during offline evaluations.
 
 ### 4. Testing – Validation of Functionality
-The application includes a comprehensive Vitest test suite with **23 / 23 passing tests** across 5 test files:
+The application includes a comprehensive Vitest test suite with **38 / 38 passing tests** across 8 test suites:
+- **Routine Domain Service Tests** (`src/test/routineService.test.ts`): Tests 24-hour cycle generation, severe vs moderate AQI risk shifts, commute modes, and induction vs LPG advice.
+- **AI Expert Engine Tests** (`src/test/expertEngineService.test.ts`): Tests DIY purifier construction, winter thermal inversion timing, infant/senior protocols, certified N95/FFP2 masks, and community RWA blueprints.
+- **Safe Markdown AST Tests** (`src/test/markdownParser.test.tsx`): Validates inline formatting, header hierarchy (H3, H4), list generation, and script tag neutralization.
 - **Security Tests** (`src/test/securityService.test.ts`): Tests XSS escaping, injection pattern blocking, rate limiting, and API key masking.
 - **AQI Calculation Tests** (`src/test/aqiService.test.ts`): Tests linear interpolation across CPCB sub-index breakpoints (Good, Satisfactory, Moderate, Poor, Very Poor, Severe).
 - **Impact Math Tests** (`src/test/impactCalculator.test.ts`): Tests daily PM2.5 inhalation avoided math, Berkeley Earth cigarette equivalence, and community scaling.
 - **Component Tests** (`src/test/components.test.tsx`): Validates rendering, family vulnerability tab navigation, and search filtering.
 - **Utilities & Constants Tests** (`src/test/utils.test.ts`): Validates credential masking in the production logger, storage key integrity, and rate limit boundaries.
-- **Component Tests** (`src/test/components.test.tsx`): Validates rendering, family vulnerability tab navigation, and search filtering.
 
 ### 5. Accessibility – Inclusive and Usable Design
 - **WCAG 2.1 AA/AAA Compliance**: Dual indicators (color + distinct icons + bold textual categories) ensure full usability for colorblind individuals.
