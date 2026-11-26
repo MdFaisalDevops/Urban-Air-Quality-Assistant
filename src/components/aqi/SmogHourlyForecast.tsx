@@ -36,7 +36,7 @@ export const SmogHourlyForecast: React.FC<SmogHourlyForecastProps> = ({ forecast
       {/* Hourly Timeline Ribbon */}
       <div className="overflow-x-auto pb-4 pt-2 -mx-2 px-2 scrollbar-thin">
         <div className="flex space-x-3 min-w-[700px]">
-          {forecast.map((hour, idx) => {
+          {forecast.map((hour) => {
             const scale = getAqiScaleInfo(hour.aqi);
             const isSelected = selectedHour?.time === hour.time;
             const hourNum = parseInt(hour.time.split(':')[0], 10);
@@ -44,7 +44,7 @@ export const SmogHourlyForecast: React.FC<SmogHourlyForecastProps> = ({ forecast
 
             return (
               <button
-                key={idx}
+                key={hour.time}
                 onClick={() => setSelectedHour(hour)}
                 className={`flex-1 p-3.5 rounded-2xl border text-center transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-[95px] flex flex-col justify-between ${
                   isSelected

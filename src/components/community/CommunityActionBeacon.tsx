@@ -6,6 +6,7 @@ export const CommunityActionBeacon: React.FC = () => {
   const [pledged, setPledged] = useState<boolean>(false);
   const [pledgeCount, setPledgeCount] = useState<number>(1428);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [templateCopied, setTemplateCopied] = useState<boolean>(false);
 
   const handlePledge = () => {
     if (!pledged) {
@@ -17,6 +18,24 @@ export const CommunityActionBeacon: React.FC = () => {
   const handleShare = (altId: string) => {
     setCopiedId(altId);
     setTimeout(() => setCopiedId(null), 2500);
+  };
+
+  const handleCopyTemplate = async () => {
+    const templateText = `VayuMitra RWA Action Resolution Template:
+1. Security Guard Electric Heater Provisioning (replace open leaf/wood drum fires).
+2. Ban on Open Leaf Sweeping Burning (community compost mandate).
+3. 4-Family School Carpool Registry (eliminate gate idling).
+4. Safe Venting Alert display on society notice board (1:00 PM - 3:15 PM).`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(templateText);
+      }
+    } catch {
+      // Graceful fallback if clipboard API restricted in test env
+    }
+    setTemplateCopied(true);
+    setTimeout(() => setTemplateCopied(false), 3000);
   };
 
   return (
@@ -131,10 +150,15 @@ export const CommunityActionBeacon: React.FC = () => {
         </div>
 
         <button
-          onClick={() => alert('VayuMitra RWA Action Resolution Template copied to clipboard!\n\n1. Security Guard Electric Heater Provisioning.\n2. Ban on Open Leaf Sweeping Burning (compost mandate).\n3. 4-Family School Carpool Registry.\n4. Safe Venting Alert display on society notice board.')}
-          className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 shrink-0 shadow-xs transition-colors"
+          onClick={handleCopyTemplate}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 shadow-xs ${
+            templateCopied
+              ? 'bg-emerald-600 text-white ring-2 ring-emerald-400'
+              : 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900'
+          }`}
+          aria-live="polite"
         >
-          Copy RWA Template
+          {templateCopied ? '✓ Copied to Clipboard!' : 'Copy RWA Template'}
         </button>
       </div>
     </section>

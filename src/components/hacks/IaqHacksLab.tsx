@@ -142,8 +142,8 @@ export const IaqHacksLab: React.FC = () => {
                 Materials Needed (Readily Available in Local Markets):
               </h4>
               <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
-                {currentHack.materialsNeeded.map((mat, i) => (
-                  <li key={i} className="flex items-center space-x-2">
+                {currentHack.materialsNeeded.map((mat) => (
+                  <li key={mat} className="flex items-center space-x-2">
                     <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span>{mat}</span>
                   </li>
@@ -158,7 +158,7 @@ export const IaqHacksLab: React.FC = () => {
               </h4>
               <ol className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
                 {currentHack.steps.map((step, i) => (
-                  <li key={i} className="flex items-start space-x-2.5">
+                  <li key={step} className="flex items-start space-x-2.5">
                     <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">
                       {i + 1}
                     </span>
@@ -296,9 +296,9 @@ export const IaqHacksLab: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {NASA_PLANTS_DATABASE.map((plant, idx) => (
+            {NASA_PLANTS_DATABASE.map((plant) => (
               <div
-                key={idx}
+                key={plant.scientificName || plant.name}
                 className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col justify-between"
               >
                 <div>

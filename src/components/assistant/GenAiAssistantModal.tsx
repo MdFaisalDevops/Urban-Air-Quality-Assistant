@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Send, X, Bot, User, Trash2, ShieldCheck, Loader2 } from 'lucide-react';
-import { ChatMessage } from '../../types/chat';
+import { Send, Bot, User, Sparkles, X, ShieldCheck, Loader2, Trash2 } from 'lucide-react';
 import { CityStation } from '../../types/aqi';
 import { FamilyProfile } from '../../types/routines';
 import { PROMPT_SHORTCUTS } from '../../data/personaPrompts';
 import { GeminiService } from '../../services/geminiService';
+import { SafeMarkdownRenderer } from '../../utils/markdownParser';
 
 interface GenAiAssistantModalProps {
   isOpen: boolean;
@@ -13,26 +13,35 @@ interface GenAiAssistantModalProps {
   profile: FamilyProfile;
 }
 
+interface Message {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  source?: 'gemini' | 'expert_engine';
+  suggestions?: string[];
+}
+
 export const GenAiAssistantModal: React.FC<GenAiAssistantModalProps> = ({
   isOpen,
   onClose,
   city,
   profile,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       sender: 'assistant',
-      text: `Namaste! I am **VayuBot**, your GenAI urban air defense assistant.\n\nI am currently analyzing real-time air quality in **${city.name}** (AQI **${city.currentAqi}**, Dominant Pollutant **${city.dominantPollutant}** at **${city.pollutants.pm25} µg/m³**).\n\nHow can I help protect your household and community today? You can choose a quick question below or ask me anything!`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      text: `Hello! I am **VayuBot**, your AI-powered winter smog advisor for **${city.name}** (Current AQI: **${city.currentAqi} - ${city.category}**).\n\nAsk me anything about indoor air quality hacks, DIY air cleaners, safe outdoor workout windows, or safeguarding children and seniors.`,
+      timestamp: 'Just now',
+      source: 'expert_engine',
       suggestions: [
         'How to build a ₹1,500 DIY Air Purifier?',
-        'When is the Safe Venting Window today?',
-        'Emergency 5-step protocol for infants & seniors',
+        'When is the safest time to ventilate today?',
+        'Emergency checklist for infants & asthmatics',
       ],
     },
   ]);
-
   const [inputPrompt, setInputPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sourceBadge, setSourceBadge] = useState<'gemini' | 'expert_engine'>('expert_engine');
@@ -46,36 +55,36 @@ export const GenAiAssistantModal: React.FC<GenAiAssistantModalProps> = ({
     if (isOpen) {
       scrollToBottom();
     }
-  }, [isOpen, messages, isLoading]);
+  }, [messages, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSend = async (textToSend?: string) => {
-    const prompt = (textToSend || inputPrompt).trim();
-    if (!prompt || isLoading) return;
+  const handleSend = async (customPrompt?: string) => {
+    const textToSend = customPrompt || inputPrompt;
+    if (!textToSend.trim() || isLoading) return;
 
-    const userMsg: ChatMessage = {
+    const userMsg: Message = {
       id: `user-${Date.now()}`,
       sender: 'user',
-      text: prompt,
+      text: textToSend.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    setInputPrompt('');
+    if (!customPrompt) setInputPrompt('');
     setIsLoading(true);
 
     try {
-      const response = await GeminiService.askAssistant(prompt, city, profile);
+      const response = await GeminiService.generateSmogAdvice(textToSend, city, profile);
       setSourceBadge(response.source);
 
-      const assistantMsg: ChatMessage = {
+      const assistantMsg: Message = {
         id: `assistant-${Date.now()}`,
         sender: 'assistant',
         text: response.text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        source: response.source,
         suggestions: response.suggestions,
-        impactCallout: response.impactCallout,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -103,44 +112,6 @@ export const GenAiAssistantModal: React.FC<GenAiAssistantModalProps> = ({
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
-  };
-
-  // Simple Markdown Formatter
-  const renderFormattedMarkdown = (content: string) => {
-    const lines = content.split('\n');
-    return lines.map((line, idx) => {
-      if (line.startsWith('### ')) {
-        return <h3 key={idx} className="text-sm font-black text-slate-900 dark:text-white mt-3 mb-1">{line.slice(4)}</h3>;
-      }
-      if (line.startsWith('#### ')) {
-        return <h4 key={idx} className="text-xs font-bold text-emerald-800 dark:text-emerald-400 mt-2 mb-1 uppercase tracking-wider">{line.slice(5)}</h4>;
-      }
-      if (line.startsWith('- ') || line.startsWith('* ')) {
-        return (
-          <li key={idx} className="ml-4 list-disc text-xs text-slate-700 dark:text-slate-300 my-0.5">
-            <span dangerouslySetInnerHTML={{ __html: line.slice(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-          </li>
-        );
-      }
-      if (/^\d+\.\s/.test(line)) {
-        return (
-          <li key={idx} className="ml-4 list-decimal text-xs text-slate-700 dark:text-slate-300 my-0.5">
-            <span dangerouslySetInnerHTML={{ __html: line.replace(/^\d+\.\s/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-          </li>
-        );
-      }
-      if (line.trim() === '---') {
-        return <hr key={idx} className="my-2 border-slate-200 dark:border-slate-800" />;
-      }
-      if (line.trim() === '') {
-        return <div key={idx} className="h-1" />;
-      }
-      return (
-        <p key={idx} className="text-xs text-slate-700 dark:text-slate-300 my-1 leading-relaxed">
-          <span dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-        </p>
-      );
-    });
   };
 
   return (
@@ -232,7 +203,7 @@ export const GenAiAssistantModal: React.FC<GenAiAssistantModalProps> = ({
                   {isUser ? (
                     <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                   ) : (
-                    <div>{renderFormattedMarkdown(msg.text)}</div>
+                    <SafeMarkdownRenderer content={msg.text} />
                   )}
 
                   <div className="mt-2 text-[10px] opacity-60 text-right">
@@ -242,9 +213,9 @@ export const GenAiAssistantModal: React.FC<GenAiAssistantModalProps> = ({
                   {/* Follow-up suggestion pills */}
                   {!isUser && msg.suggestions && msg.suggestions.length > 0 && (
                     <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-700/80 flex flex-wrap gap-1.5">
-                      {msg.suggestions.map((sug, i) => (
+                      {msg.suggestions.map((sug) => (
                         <button
-                          key={i}
+                          key={sug}
                           onClick={() => handleSend(sug)}
                           disabled={isLoading}
                           className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 transition-colors"

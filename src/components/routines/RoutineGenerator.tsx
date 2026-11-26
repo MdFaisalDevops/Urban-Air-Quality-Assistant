@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FamilyProfile } from '../../types/routines';
 import { CityStation } from '../../types/aqi';
+import { RoutineService, GeneratedRoutineStep } from '../../services/routineService';
 import { Sun, Car, Wind, Utensils, Moon, Shield, AlertTriangle, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface RoutineGeneratorProps {
@@ -8,69 +9,27 @@ interface RoutineGeneratorProps {
   city: CityStation;
 }
 
-export const RoutineGenerator: React.FC<RoutineGeneratorProps> = ({ profile, city }) => {
-  const isHighAqi = city.currentAqi > 200;
+const renderStepIcon = (iconType: GeneratedRoutineStep['iconType']): React.ReactNode => {
+  switch (iconType) {
+    case 'morning':
+      return <Sun className="w-5 h-5 text-amber-500" />;
+    case 'commute':
+      return <Car className="w-5 h-5 text-blue-500" />;
+    case 'venting':
+      return <Wind className="w-5 h-5 text-emerald-500" />;
+    case 'dinner':
+      return <Utensils className="w-5 h-5 text-purple-500" />;
+    case 'night':
+      return <Moon className="w-5 h-5 text-indigo-500" />;
+    default:
+      return <Shield className="w-5 h-5 text-emerald-500" />;
+  }
+};
 
-  const routineSteps = [
-    {
-      timeRange: '06:00 AM – 08:00 AM',
-      title: 'Morning Awakening & Physical Routine',
-      icon: <Sun className="w-5 h-5 text-amber-500" />,
-      standardRoutine: 'Early morning brisk jog or outdoor morning walk in the park; dry broom sweeping the living room.',
-      lowEmissionRoutine: isHighAqi
-        ? 'Indoor stretching, yoga, or treadmill exercise. Shift outdoor activities to 1:30 PM.'
-        : 'Outdoor jog safe in parks away from arterial traffic corridors.',
-      indoorHack: 'Strictly use damp microfiber mopping (pocha) with warm water. Ban dry brooms which fling PM2.5 up to child lung level.',
-      impactReason: 'Morning thermal inversion traps night diesel and biomass smog within 100m of ground level. Morning exercise increases ventilation rate by 400%, forcing particulate deep into lung alveoli.',
-      risk: isHighAqi ? 'Hazardous Outdoors' : 'Moderate',
-    },
-    {
-      timeRange: '08:00 AM – 09:30 AM',
-      title: 'School Run & Daily Commute',
-      icon: <Car className="w-5 h-5 text-blue-500" />,
-      standardRoutine: 'Solo driving in bumper-to-bumper traffic with outside air intake on; waiting with idling engine outside school gate.',
-      lowEmissionRoutine: profile.commuteMode === 'metro'
-        ? 'Taking electric Metro Rail with N95 mask for walking portions.'
-        : profile.commuteMode === 'carpool'
-        ? 'Shared 4-parent school carpool cluster; engine turned OFF during wait.'
-        : 'Engage Car AC "Recirculate Mode" immediately; do not lower windows.',
-      indoorHack: 'Equip children with snug FFP2/N95 masks; avoid porous cloth or surgical masks that offer zero PM2.5 seal.',
-      impactReason: 'Exhaust from idling cars creates intense local toxic plumes at 3 feet height. Car recirculation mode drops interior PM2.5 by 65%. Commute shifting saves up to 4.2 kg CO2 daily.',
-      risk: 'High Traffic Exposure',
-    },
-    {
-      timeRange: '01:00 PM – 03:00 PM',
-      title: 'Safe Solar Venting Window',
-      icon: <Wind className="w-5 h-5 text-emerald-500" />,
-      standardRoutine: 'Keeping windows closed all day long or opening them blindly during the morning smog hours.',
-      lowEmissionRoutine: 'Open opposing windows for exactly 15 to 20 minutes to cross-ventilate indoor living spaces.',
-      indoorHack: 'Take advantage of midday solar heating that breaks the nocturnal inversion layer. Flush stale CO2, kitchen moisture, and indoor VOCs.',
-      impactReason: 'Midday sun lifts the atmospheric mixing boundary layer to 1,200m, dispersing surface smog. Prevents indoor CO2 build-up exceeding 1,600 ppm.',
-      risk: 'Safe Window',
-    },
-    {
-      timeRange: '06:30 PM – 08:30 PM',
-      title: 'Evening Dinner & Cooking Cleanliness',
-      icon: <Utensils className="w-5 h-5 text-purple-500" />,
-      standardRoutine: 'High-heat frying with LPG gas stove without turning on exhaust chimney; burning agarbatti or dhoop for evening prayer.',
-      lowEmissionRoutine: profile.cookingFuel === 'induction'
-        ? 'Cooking with Induction Cooktop with covered lids; exhaust fan turned on 2 minutes prior.'
-        : 'Run kitchen exhaust fan for 10 minutes after cooking; keep kitchen door shut.',
-      indoorHack: 'Replace scented dhoop and mosquito coils with smoke-free reed diffusers, LED prayer lamps, and magnetic window insect screens.',
-      impactReason: 'LPG combustion and incense emit up to 350 µg/m³ of ultrafine soot and NO2. A single mosquito coil equals 75-100 cigarettes in PM2.5 output.',
-      risk: 'High Indoor Spike Risk',
-    },
-    {
-      timeRange: '09:00 PM – 11:00 PM',
-      title: 'Night Bedroom Air Sanctuary',
-      icon: <Moon className="w-5 h-5 text-indigo-500" />,
-      standardRoutine: 'Sleeping with doors unsealed and burning a mosquito coil or unvented coal angithi for warmth.',
-      lowEmissionRoutine: 'Run DIY Corsi-Rosenthal / HEPA fan filter on medium speed; door draft stopped with foam or rolled towel.',
-      indoorHack: 'Place 2 Snake Plants (Sansevieria) in bedroom—their Crassulacean Acid Metabolism (CAM) absorbs CO2 and releases oxygen throughout the night.',
-      impactReason: 'Night temperature drop locks surface pollution until 9 AM. Running an indoor purifier maintains bedroom PM2.5 < 25 µg/m³ for restorative sleep.',
-      risk: 'Restorative Sleep Mode',
-    },
-  ];
+export const RoutineGenerator: React.FC<RoutineGeneratorProps> = ({ profile, city }) => {
+  const routineSteps = useMemo(() => {
+    return RoutineService.generateDailyRoutine(profile, city);
+  }, [profile, city]);
 
   return (
     <section aria-labelledby="routine-generator-heading" className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm transition-colors">
@@ -95,15 +54,15 @@ export const RoutineGenerator: React.FC<RoutineGeneratorProps> = ({ profile, cit
 
       {/* Routine Timeline Cards */}
       <div className="space-y-4">
-        {routineSteps.map((step, idx) => (
+        {routineSteps.map((step) => (
           <div
-            key={idx}
+            key={step.id}
             className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-5 hover:bg-white dark:hover:bg-slate-800 transition-colors"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-700/60 pb-3 mb-3">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-xl bg-white dark:bg-slate-700 shadow-xs">
-                  {step.icon}
+                  {renderStepIcon(step.iconType)}
                 </div>
                 <div>
                   <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 tracking-wider uppercase block">
@@ -172,4 +131,3 @@ export const RoutineGenerator: React.FC<RoutineGeneratorProps> = ({ profile, cit
     </section>
   );
 };
-
