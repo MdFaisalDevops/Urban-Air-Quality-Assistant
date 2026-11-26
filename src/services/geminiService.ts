@@ -3,8 +3,8 @@ import { SYSTEM_INSTRUCTION_VAYUMITRA } from '../data/personaPrompts';
 import { SecurityService } from './securityService';
 import { CityStation } from '../types/aqi';
 import { FamilyProfile } from '../types/routines';
-
-const API_KEY_STORAGE_KEY = 'vayumitra_gemini_api_key';
+import { STORAGE_KEYS } from '../constants/appConstants';
+import { logger } from '../utils/logger';
 
 export interface AssistantResponse {
   text: string;
@@ -14,41 +14,50 @@ export interface AssistantResponse {
   error?: string;
 }
 
+/**
+ * Service managing GenAI interactions via Google Generative AI (Gemini)
+ * and providing resilient zero-setup fallback via the Deterministic AI Expert Engine.
+ */
 export class GeminiService {
   /**
-   * Retrieves saved API key from localStorage or environment
+   * Retrieves saved API key from localStorage or Vite environment
    */
   public static getApiKey(): string | null {
     try {
-      const stored = localStorage.getItem(API_KEY_STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEYS.GEMINI_API_KEY);
       if (stored && stored.trim()) return stored.trim();
-    } catch {
-      // Ignore localStorage error
+    } catch (err: unknown) {
+      logger.warn('Failed to access localStorage for Gemini API Key:', err);
     }
-    // Check environment variable
-    return (import.meta as any).env?.VITE_GEMINI_API_KEY || null;
+    // Strongly typed via vite-env.d.ts
+    return import.meta.env.VITE_GEMINI_API_KEY || null;
   }
 
   /**
-   * Saves API key to localStorage
+   * Saves or clears API key in localStorage
    */
   public static setApiKey(key: string): void {
-    if (key.trim()) {
-      localStorage.setItem(API_KEY_STORAGE_KEY, key.trim());
-    } else {
-      localStorage.removeItem(API_KEY_STORAGE_KEY);
+    try {
+      if (key.trim()) {
+        localStorage.setItem(STORAGE_KEYS.GEMINI_API_KEY, key.trim());
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.GEMINI_API_KEY);
+      }
+    } catch (err: unknown) {
+      logger.error('Failed to save Gemini API Key to localStorage:', err);
     }
   }
 
   /**
-   * Generates response using Gemini API or the built-in Expert Engine
+   * Generates a context-aware air quality advisory response
+   * using either live Gemini 1.5 Flash or the built-in Expert Engine.
    */
   public static async askAssistant(
     userPrompt: string,
     city: CityStation,
     profile?: FamilyProfile
   ): Promise<AssistantResponse> {
-    // 1. Security & Validation Check
+    // 1. Security & Validation Check (OWASP Prompt Injection + XSS defense)
     const validation = SecurityService.validatePrompt(userPrompt);
     if (!validation.isValid) {
       return {
@@ -69,7 +78,7 @@ export class GeminiService {
 
     const apiKey = this.getApiKey();
 
-    // 2. If API Key is present, invoke Google Generative AI
+    // 2. If API Key is configured, attempt live Google Generative AI
     if (apiKey) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -106,8 +115,11 @@ Provide an actionable, empathetic, and scientifically rigorous response. At the 
           source: 'gemini',
           suggestions: this.generateFollowUpSuggestions(validation.sanitizedText),
         };
-      } catch (err: any) {
-        console.warn('Gemini API call failed, falling back to Expert Engine:', err?.message || err);
+      } catch (err: unknown) {
+        logger.warn(
+          'Gemini API call failed, falling back to Expert Engine:',
+          err instanceof Error ? err.message : err
+        );
         // Fall through to Built-in Expert Engine
       }
     }

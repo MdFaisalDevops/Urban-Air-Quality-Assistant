@@ -1,4 +1,5 @@
 import { FamilyProfile, ImpactMetrics } from '../types/routines';
+import { SCIENTIFIC_BENCHMARKS } from '../constants/appConstants';
 
 /**
  * Scientific Impact Calculator
@@ -11,7 +12,7 @@ import { FamilyProfile, ImpactMetrics } from '../types/routines';
  */
 export class ImpactCalculator {
   // Average human daily breathing volume = ~12 m³ for adults, ~8 m³ for toddlers (higher rate per kg)
-  private static ADULT_DAILY_AIR_VOLUME_M3 = 12.0;
+  private static ADULT_DAILY_AIR_VOLUME_M3 = SCIENTIFIC_BENCHMARKS.ADULT_DAILY_AIR_VOLUME_M3;
 
   /**
    * Computes personalized direct impact based on current city AQI and family profile
@@ -48,7 +49,7 @@ export class ImpactCalculator {
 
     // Cigarette Equivalence:
     // Berkeley Earth standard: 22 µg/m³ ambient over 24h corresponds to ~264 µg inhaled per day per cigarette.
-    const microgramPerCigarette = 264;
+    const microgramPerCigarette = SCIENTIFIC_BENCHMARKS.MICROGRAMS_PER_CIGARETTE;
     const equivalentCigarettesAvoided = Number((avoidedPerPerson / microgramPerCigarette).toFixed(1));
 
     // 2. Daily Emissions Avoided at Source

@@ -1,46 +1,55 @@
 import { CityStation, HourlyForecast } from '../types/aqi';
 import { INDIAN_CITIES_STATIONS } from '../data/citiesData';
 import { getAqiCategory } from '../constants/aqiScales';
+import { APP_CONFIG, STORAGE_KEYS } from '../constants/appConstants';
+import { logger } from '../utils/logger';
 
-const CACHE_PREFIX = 'vayumitra_aqi_cache_';
-const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes cache
+interface CachedAqiRecord {
+  timestamp: number;
+  data: CityStation;
+}
 
+/**
+ * Service managing live AQI data retrieval, CPCB linear interpolation calculations,
+ * and resilient local caching.
+ */
 export class AqiService {
   /**
-   * Retrieves all supported Indian city stations with cached or fallback data
+   * Retrieves all supported Indian city stations with calibrated default data
    */
   public static getAllCities(): CityStation[] {
     return INDIAN_CITIES_STATIONS;
   }
 
   /**
-   * Fetches real-time air quality data for a given city station
-   * Attempts live Open-Meteo Air Quality API -> checks cache -> falls back gracefully
+   * Fetches real-time air quality data for a given city station.
+   * Order of precedence: Memory/Storage Cache -> Live Open-Meteo API -> Calibrated Fallback.
    */
   public static async getCityData(stationId: string): Promise<CityStation> {
     const defaultStation = INDIAN_CITIES_STATIONS.find((c) => c.id === stationId) || INDIAN_CITIES_STATIONS[0];
-    const cacheKey = `${CACHE_PREFIX}${stationId}`;
+    const cacheKey = `${STORAGE_KEYS.AQI_CACHE_PREFIX}${stationId}`;
 
     // 1. Check local cache
     try {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
+        const parsed = JSON.parse(cached) as CachedAqiRecord;
+        if (Date.now() - parsed.timestamp < APP_CONFIG.AQI_CACHE_TTL_MS) {
+          logger.debug(`Serving AQI data for ${stationId} from cache`);
           return parsed.data;
         }
       }
-    } catch {
-      // Ignore localStorage read errors
+    } catch (err: unknown) {
+      logger.warn(`Failed reading cache for station ${stationId}:`, err);
     }
 
     // 2. Attempt Live API Fetch from Open-Meteo Air Quality
     try {
       const { lat, lon } = defaultStation;
-      const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,carbon_monoxide&hourly=pm10,pm2_5,nitrogen_dioxide&timezone=Asia%2FKolkata&forecast_days=2`;
+      const url = `${APP_CONFIG.OPEN_METEO_BASE_URL}?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,nitrogen_dioxide,sulphur_dioxide,ozone,carbon_monoxide&hourly=pm10,pm2_5,nitrogen_dioxide&timezone=${encodeURIComponent(APP_CONFIG.TIMEZONE)}&forecast_days=2`;
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout for rapid UX
+      const timeoutId = setTimeout(() => controller.abort(), APP_CONFIG.API_TIMEOUT_MS);
 
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
@@ -65,7 +74,7 @@ export class AqiService {
           const forecast: HourlyForecast[] = [];
           if (hourly && hourly.time && hourly.pm2_5) {
             const currentHour = new Date().getHours();
-            // Pick next 8 intervals (every 2-3 hours)
+            // Sample next 8 intervals (every 3 hours)
             for (let i = currentHour; i < currentHour + 24; i += 3) {
               const idx = i < hourly.time.length ? i : currentHour;
               const hourPm25 = Math.round(hourly.pm2_5[idx] || pm25);
@@ -111,19 +120,20 @@ export class AqiService {
 
           // Cache valid response
           try {
-            localStorage.setItem(
-              cacheKey,
-              JSON.stringify({ timestamp: Date.now(), data: liveStation })
-            );
-          } catch {
-            // Ignore cache save errors
+            const cachePayload: CachedAqiRecord = {
+              timestamp: Date.now(),
+              data: liveStation,
+            };
+            localStorage.setItem(cacheKey, JSON.stringify(cachePayload));
+          } catch (cacheErr: unknown) {
+            logger.warn(`Failed writing AQI cache for ${stationId}:`, cacheErr);
           }
 
           return liveStation;
         }
       }
-    } catch {
-      // Fallback silently if offline or network error occurs
+    } catch (fetchErr: unknown) {
+      logger.warn(`Live API fetch failed for station ${stationId}, serving default:`, fetchErr);
     }
 
     // 3. Fallback to calibrated station defaults
@@ -173,4 +183,3 @@ export class AqiService {
     return Math.min(650, Math.round(highest.iH + (conc - highest.bpH) * 0.4));
   }
 }
-

@@ -1,3 +1,5 @@
+import { SECURITY_CONFIG } from '../constants/appConstants';
+
 /**
  * Security Service - Safe and Responsible Implementation
  * Follows OWASP recommendations for prompt injection defense, XSS mitigation, and rate limiting.
@@ -10,8 +12,8 @@ export interface SecurityValidationResult {
 }
 
 export class SecurityService {
-  private static MAX_PROMPT_LENGTH = 1200;
-  private static MIN_PROMPT_LENGTH = 2;
+  private static MAX_PROMPT_LENGTH = SECURITY_CONFIG.MAX_PROMPT_LENGTH;
+  private static MIN_PROMPT_LENGTH = SECURITY_CONFIG.MIN_PROMPT_LENGTH;
 
   // Known prompt injection and jailbreak signatures
   private static INJECTION_PATTERNS = [
@@ -28,8 +30,8 @@ export class SecurityService {
 
   // Rate limiting tracker (client-side protection against spam/exhaustion)
   private static requestTimestamps: number[] = [];
-  private static RATE_LIMIT_MAX_REQUESTS = 15;
-  private static RATE_LIMIT_WINDOW_MS = 60000; // 15 requests per minute
+  private static RATE_LIMIT_MAX_REQUESTS = SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS;
+  private static RATE_LIMIT_WINDOW_MS = SECURITY_CONFIG.RATE_LIMIT_WINDOW_MS;
 
   /**
    * Sanitizes text to prevent Cross-Site Scripting (XSS)

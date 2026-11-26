@@ -187,15 +187,15 @@ export const LifestyleForm: React.FC<LifestyleFormProps> = ({ profile, onChangeP
             <span>Room Filtration & Ventilation Status</span>
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {[
+            {([
               { id: 'diy_filtered', label: 'DIY Filter / HEPA Active', desc: 'Active high CADR filtration' },
               { id: 'sealed', label: 'Sealed Doors & Windows', desc: 'Draft stopped, no active purifier' },
               { id: 'cross_ventilated', label: 'Open Windows / Infiltrated', desc: 'Direct exposure to street smog' },
-            ].map((v) => (
+            ] as const).map((v) => (
               <button
                 key={v.id}
                 type="button"
-                onClick={() => updateField('ventilationType', v.id as any)}
+                onClick={() => updateField('ventilationType', v.id)}
                 className={`p-2.5 rounded-xl border text-left transition-all ${
                   profile.ventilationType === v.id
                     ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-500'
